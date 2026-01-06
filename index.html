@@ -1,57 +1,60 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PS1 High Command - Force Boot</title>
+    <title>PSX Engine - Recovery Mode</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
-        #game-box { width: 100%; height: 100%; }
-        #overlay {
+        #emu-container { width: 100%; height: 100%; position: absolute; z-index: 1; }
+        #manual-start {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000; color: #0f0; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 99;
-            font-family: monospace; text-align: center;
+            background: rgba(0,0,0,0.9); z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            color: #0f0; font-family: monospace; text-align: center;
         }
-        button {
-            padding: 20px 40px; background: transparent; color: #0f0;
-            border: 2px solid #0f0; font-size: 20px; cursor: pointer;
+        .btn {
+            padding: 20px 40px; border: 2px solid #0f0; background: transparent;
+            color: #0f0; font-size: 20px; cursor: pointer; margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
-    <div id="overlay">
+    <div id="manual-start">
         <h1>PSX CORE READY</h1>
-        <p id="msg">ISO & BIOS Verified</p>
-        <button id="start">INITIALIZE ENGINE</button>
+        <p>If screen stays black, click RE-SYNC</p>
+        <button class="btn" id="btn-load">1. LOAD ENGINE</button>
+        <button class="btn" id="btn-sync" style="display:none;">2. RE-SYNC GRAPHICS</button>
     </div>
 
-    <div id="game-box"><div id="game"></div></div>
+    <div id="emu-container"><div id="game"></div></div>
 
     <script>
-        document.getElementById('start').onclick = function() {
-            this.style.display = "none";
-            document.getElementById('msg').innerText = "Mounting ISO... Please wait 30s";
+        const loadBtn = document.getElementById('btn-load');
+        const syncBtn = document.getElementById('btn-sync');
+        const overlay = document.getElementById('manual-start');
+
+        loadBtn.onclick = function() {
+            loadBtn.style.display = "none";
+            syncBtn.style.display = "block";
             
-            // EmulatorJS High-Performance Settings
             window.EmuJS_path = "https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/";
             window.EmuJS_gameUrl = "game.iso";
             window.EmuJS_biosUrl = "scph1001.bin";
             window.EmuJS_core = "psx";
-            
-            // Force settings to fix black screen
             window.EmuJS_startOnLoaded = true;
             window.EmuJS_autoSave = true;
-            window.EmuJS_pwa = true; // High priority mode
-            
-            // Graphics Fix
+
             const script = document.createElement('script');
             script.src = "https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/loader.js";
             document.body.appendChild(script);
+        };
 
-            setTimeout(() => {
-                document.getElementById('overlay').style.display = 'none';
-            }, 5000);
+        syncBtn.onclick = function() {
+            // Force browser to refresh the canvas
+            overlay.style.display = "none";
+            window.dispatchEvent(new Event('resize'));
+            console.log("Graphics Resynced");
         };
     </script>
 </body>
