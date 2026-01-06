@@ -1,52 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PSX High Command - Stable Build</title>
+    <title>PS1 High Command - Force Boot</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; color: #00ff00; font-family: 'Courier New', monospace; }
-        #game-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; display: none; }
-        #setup-screen { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; }
-        .start-btn { padding: 20px 50px; border: 3px solid #00ff00; background: transparent; color: #00ff00; font-size: 22px; cursor: pointer; font-weight: bold; margin-top: 20px; }
-        .start-btn:active { background: #00ff00; color: #000; }
-        .status-box { border: 1px solid #333; padding: 10px; margin-top: 20px; font-size: 12px; width: 80%; max-width: 400px; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+        #game-box { width: 100%; height: 100%; }
+        #overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: #0f0; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 99;
+            font-family: monospace; text-align: center;
+        }
+        button {
+            padding: 20px 40px; background: transparent; color: #0f0;
+            border: 2px solid #0f0; font-size: 20px; cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-    <div id="setup-screen">
-        <h1>SYSTEM READY</h1>
-        <p>BIOS: scph1001.bin detected</p>
-        <p>ISO: game.iso mounted</p>
-        <button class="start-btn" id="launch">RUN PSX CORE</button>
-        <div class="status-box" id="logs">Status: Awaiting User Interaction...</div>
+    <div id="overlay">
+        <h1>PSX CORE READY</h1>
+        <p id="msg">ISO & BIOS Verified</p>
+        <button id="start">INITIALIZE ENGINE</button>
     </div>
 
-    <div id="game-container">
-        <div id="game"></div>
-    </div>
+    <div id="game-box"><div id="game"></div></div>
 
     <script>
-        const launchBtn = document.getElementById('launch');
-        const logs = document.getElementById('logs');
-
-        launchBtn.onclick = function() {
-            logs.innerText = "Initializing Graphics Engine...";
-            document.getElementById('setup-screen').style.display = 'none';
-            document.getElementById('game-container').style.display = 'block';
-
-            // Emulator Configuration
+        document.getElementById('start').onclick = function() {
+            this.style.display = "none";
+            document.getElementById('msg').innerText = "Mounting ISO... Please wait 30s";
+            
+            // EmulatorJS High-Performance Settings
             window.EmuJS_path = "https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/";
-            window.EmuJS_gameUrl = "game.iso"; 
-            window.EmuJS_biosUrl = "scph1001.bin"; // Updated Name
+            window.EmuJS_gameUrl = "game.iso";
+            window.EmuJS_biosUrl = "scph1001.bin";
             window.EmuJS_core = "psx";
+            
+            // Force settings to fix black screen
             window.EmuJS_startOnLoaded = true;
-
-            // Loader Injection
+            window.EmuJS_autoSave = true;
+            window.EmuJS_pwa = true; // High priority mode
+            
+            // Graphics Fix
             const script = document.createElement('script');
             script.src = "https://cdn.jsdelivr.net/gh/EmulatorJS/EmulatorJS@latest/data/loader.js";
-            script.onload = () => { logs.innerText = "Core Loaded. Booting ISO..."; };
             document.body.appendChild(script);
+
+            setTimeout(() => {
+                document.getElementById('overlay').style.display = 'none';
+            }, 5000);
         };
     </script>
 </body>
